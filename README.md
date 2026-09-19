@@ -114,7 +114,7 @@ verify it yourself.
 ## Requirements
 
 - macOS 13+
-- Xcode 15+ (Swift 5.9) to build
+- Xcode 16+ to build (the project uses folder-synced groups); `swift run` needs Swift 5.9+
 
 ## Build & Run
 

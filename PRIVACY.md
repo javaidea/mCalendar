@@ -117,8 +117,9 @@ consent prompt for it.
 You do not have to take my word for it:
 
 - The full source is at
-  <https://github.com/javaidea/mCalendar> — it is about 1,450 lines. All
-  network code is in `Sources/mCalendar/Holidays.swift`.
+  <https://github.com/javaidea/mCalendar> — it is about 1,800 lines. All
+  network code is in `Sources/mCalendar/Holidays/`, and every request goes
+  through the one session defined in `HolidaySession.swift`.
 - `codesign -d --entitlements - /Applications/mCalendar.app` shows the app
   requests no entitlements.
 - Point a network monitor (Little Snitch, LuLu, `nettop`) at it: with holidays
@@ -242,8 +243,9 @@ Mini Calendar 不申请任何系统权限,所以 macOS 从不会为它弹出授�
 
 这些话不必只听我说:
 
-- 完整源码在 <https://github.com/javaidea/mCalendar>,大约 1450 行,
-  所有联网代码都在 `Sources/mCalendar/Holidays.swift`。
+- 完整源码在 <https://github.com/javaidea/mCalendar>,大约 1800 行,
+  所有联网代码都在 `Sources/mCalendar/Holidays/` 目录下,每个请求都经由
+  `HolidaySession.swift` 中定义的同一个网络会话发出。
 - `codesign -d --entitlements - /Applications/mCalendar.app` 会显示它没有申请
   任何 entitlement。
 - 用网络监控工具(Little Snitch、LuLu、`nettop`)盯着它:关闭节假日时它一直静默;
