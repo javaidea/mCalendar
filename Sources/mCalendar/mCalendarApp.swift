@@ -24,6 +24,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Menubar-only app: no Dock icon.
         NSApp.setActivationPolicy(.accessory)
+        // Use the icon in the bundle rather than the system's cached copy, which
+        // can lag behind a new icon when the version number stays the same.
+        if let icon = Bundle.main.image(forResource: "AppIcon") {
+            NSApp.applicationIconImage = icon
+        }
         applyAppearance()
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
