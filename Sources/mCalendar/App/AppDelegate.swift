@@ -6,7 +6,9 @@ import AppKit
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let settings = Settings.shared
     private(set) var statusItem: StatusItemController!
-    private(set) lazy var calendarPopover = CalendarPopoverController(settings: settings)
+    private(set) lazy var calendarPopover = CalendarPopoverController(settings: settings) { [weak self] in
+        self?.openSettings()
+    }
     private(set) lazy var settingsWindow = SettingsWindowController(settings: settings)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -16,7 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // can lag behind a new icon when the version number stays the same.
         // Read the .icns file directly: `Bundle.image(forResource:)` looks in an
         // asset catalog first, and with none in the app CoreUI logs an error.
-        if let url = Bundle.main.url(forResource: "AppIcon", withExtension: "icns"),
+        if let url = Bundle.resources.url(forResource: "AppIcon", withExtension: "icns"),
            let icon = NSImage(contentsOf: url) {
             NSApp.applicationIconImage = icon
         }
@@ -36,8 +38,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         installDebugHooks()
     }
 
-    /// Opens the settings window, closing the popover first. Called from the
-    /// gear button in the popover.
+    /// Opens the settings window, closing the popover first.
     func openSettings() {
         calendarPopover.close()
         settingsWindow.show()

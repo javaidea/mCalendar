@@ -8,11 +8,14 @@ import SwiftUI
 @MainActor
 final class CalendarPopoverController {
     private let settings: Settings
+    private let onOpenSettings: () -> Void
     private var popover: NSPopover?
     private var outsideClickMonitor: Any?
 
-    init(settings: Settings) {
+    /// `onOpenSettings` is what the gear button in the popover does.
+    init(settings: Settings, onOpenSettings: @escaping () -> Void) {
         self.settings = settings
+        self.onOpenSettings = onOpenSettings
     }
 
     /// The popover's appearance; nil follows the system. Applied to the open
@@ -33,7 +36,9 @@ final class CalendarPopoverController {
         let popover = NSPopover()
         popover.behavior = .applicationDefined
         popover.appearance = appearance
-        let hosting = NSHostingController(rootView: CalendarView().environmentObject(settings))
+        let hosting = NSHostingController(
+            rootView: CalendarView(onOpenSettings: onOpenSettings).environmentObject(settings)
+        )
         // Size the popover to its content, which also avoids clipping at the top.
         hosting.sizingOptions = [.preferredContentSize]
         popover.contentViewController = hosting

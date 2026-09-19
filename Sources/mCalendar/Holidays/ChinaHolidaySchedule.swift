@@ -3,8 +3,8 @@ import Foundation
 /// China's holiday and make-up workday schedule (放假调休安排), announced by the
 /// State Council each year. Years not announced yet get no guesses.
 ///
-/// Downloaded from the holiday-cn project and cached on disk; two years are
-/// also built in so they show offline.
+/// Downloaded from the holiday-cn project and cached on disk; the years in
+/// `Resources/` are also built in so they show offline.
 enum ChinaHolidaySchedule {
     struct DayStatus {
         let holidays: [String]
@@ -17,40 +17,20 @@ enum ChinaHolidaySchedule {
 
     // MARK: - Built-in years
 
-    /// Offline fallback. Ranges and dates are written month * 100 + day.
-    static let builtIn: [Int: YearPlan] = [
-        2025: plan(
-            2025,
-            holidays: [
-                (["元旦"], 101, 101), (["春节"], 128, 204), (["清明节"], 404, 406),
-                (["劳动节"], 501, 505), (["端午节"], 531, 602), (["国庆节", "中秋节"], 1001, 1008)
-            ],
-            makeupWorkdays: [126, 208, 427, 928, 1011]
-        ),
-        2026: plan(
-            2026,
-            holidays: [
-                (["元旦"], 101, 103), (["春节"], 215, 223), (["清明节"], 404, 406),
-                (["劳动节"], 501, 505), (["端午节"], 619, 621), (["中秋节"], 925, 927),
-                (["国庆节"], 1001, 1007)
-            ],
-            makeupWorkdays: [104, 214, 228, 509, 920, 1010]
-        )
-    ]
-
-    private static func plan(_ year: Int, holidays: [([String], Int, Int)], makeupWorkdays: [Int]) -> YearPlan {
-        var days: YearPlan = [:]
-        for (names, first, last) in holidays {
-            // A range such as 128...204 crosses a month end; skip the non-dates.
-            for monthDay in first...last where (1...31).contains(monthDay % 100) {
-                days[year * 10_000 + monthDay] = DayStatus(holidays: names, isMakeupWorkday: false)
-            }
+    /// Offline fallback: every `Resources/ChinaHolidays-<year>.json`, which are
+    /// holiday-cn's own files, so a year is added by dropping one in.
+    static let builtIn: [Int: YearPlan] = {
+        var plans: [Int: YearPlan] = [:]
+        for url in Bundle.resources.urls(forResourcesWithExtension: "json", subdirectory: nil) ?? [] {
+            let name = url.deletingPathExtension().lastPathComponent
+            guard name.hasPrefix("ChinaHolidays-"),
+                  let year = Int(name.dropFirst("ChinaHolidays-".count)),
+                  let data = try? Data(contentsOf: url),
+                  let plan = decode(data, year: year) else { continue }
+            plans[year] = plan
         }
-        for monthDay in makeupWorkdays {
-            days[year * 10_000 + monthDay] = DayStatus(holidays: [], isMakeupWorkday: true)
-        }
-        return days
-    }
+        return plans
+    }()
 
     // MARK: - Download
 

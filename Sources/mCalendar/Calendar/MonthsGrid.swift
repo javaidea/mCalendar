@@ -11,7 +11,7 @@ struct MonthsGrid: View {
     let showWeeks: Bool
     let showLunar: Bool
     /// Countries whose holidays are marked; empty when holidays are off.
-    let holidayCountries: [String]
+    let holidayCountries: [CountryCode]
     let metrics: GridMetrics
     let cal: Calendar
 

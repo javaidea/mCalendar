@@ -9,7 +9,6 @@ final class StatusItemController: NSObject {
 
     private let statusItem: NSStatusItem
     private let settings: Settings
-    private var timer: Timer?
 
     var button: NSStatusBarButton? { statusItem.button }
 
@@ -24,11 +23,24 @@ final class StatusItemController: NSObject {
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
         updateTitle()
+        observeDateChanges()
+    }
 
-        // Refresh the label periodically so it rolls over at midnight.
-        timer = Timer.scheduledTimer(withTimeInterval: 20, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.updateTitle() }
+    /// Refreshes the label whenever the date it shows can change, rather than
+    /// polling: at midnight, when the clock or time zone is changed, and on
+    /// waking from sleep in case midnight passed meanwhile.
+    private func observeDateChanges() {
+        for name in [Notification.Name.NSCalendarDayChanged, .NSSystemClockDidChange, .NSSystemTimeZoneDidChange] {
+            NotificationCenter.default.addObserver(self, selector: #selector(dateMayHaveChanged), name: name, object: nil)
         }
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self, selector: #selector(dateMayHaveChanged), name: NSWorkspace.didWakeNotification, object: nil
+        )
+    }
+
+    // Day-change notifications are posted on a background thread.
+    @objc nonisolated private func dateMayHaveChanged() {
+        Task { @MainActor in self.updateTitle() }
     }
 
     /// Sets the label to "Jul 25, Sat" / "7月25日 周六", or whichever parts are
@@ -67,11 +79,11 @@ final class StatusItemController: NSObject {
 
     private func showContextMenu(_ sender: NSStatusBarButton) {
         let menu = NSMenu()
-        let about = NSMenuItem(title: settings.t("about"), action: #selector(showAbout), keyEquivalent: "")
+        let about = NSMenuItem(title: settings.t(.about), action: #selector(showAbout), keyEquivalent: "")
         about.target = self
         menu.addItem(about)
         menu.addItem(.separator())
-        let quit = NSMenuItem(title: settings.t("quit"), action: #selector(quit), keyEquivalent: "q")
+        let quit = NSMenuItem(title: settings.t(.quit), action: #selector(quit), keyEquivalent: "q")
         quit.target = self
         menu.addItem(quit)
         // Assigning the menu makes the system drop it directly under the status

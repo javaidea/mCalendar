@@ -31,14 +31,14 @@ final class SettingsWindowController {
 
     /// Re-reads the title, for when the interface language changes.
     func updateTitle() {
-        window?.title = settings.t("settings")
+        window?.title = settings.t(.settings)
     }
 
     private func makeWindow() -> NSWindow {
         let hosting = NSHostingController(rootView: SettingsView().environmentObject(settings))
         let window = NSWindow(contentViewController: hosting)
         window.styleMask = [.titled, .closable]
-        window.title = settings.t("settings")
+        window.title = settings.t(.settings)
         window.isReleasedWhenClosed = false
         return window
     }

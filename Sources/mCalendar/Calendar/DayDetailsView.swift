@@ -17,9 +17,9 @@ struct DayDetailsView: View {
                 .font(.system(size: 13, weight: .semibold))
 
             if showLunar {
-                row(settings.t("lunarDate"), LunarDate.string(from: date, includeMonth: true))
+                row(settings.t(.lunarDate), LunarDate.string(from: date, includeMonth: true))
                 if let term = SolarTerm.name(for: date, cal: cal) {
-                    row(settings.t("solarTerm"), term, color: .accentColor)
+                    row(settings.t(.solarTerm), term, color: .accentColor)
                 }
             }
 
@@ -28,10 +28,10 @@ struct DayDetailsView: View {
             }
 
             if holiday.isMakeupWorkday {
-                row(settings.t("chinaSchedule"), settings.t("makeupWorkday"), color: .orange)
+                row(settings.t(.chinaSchedule), settings.t(.makeupWorkday), color: .orange)
             }
 
-            row(settings.t("week"), "\(cal.component(.weekOfYear, from: date))")
+            row(settings.t(.week), "\(cal.component(.weekOfYear, from: date))")
         }
         .font(.system(size: 12))
         .textSelection(.enabled)

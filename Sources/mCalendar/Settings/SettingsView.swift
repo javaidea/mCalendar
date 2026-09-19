@@ -11,15 +11,15 @@ struct SettingsView: View {
             Divider()
 
             monthCountRow
-            toggleRow("showDate", $settings.showDate)
-            toggleRow("showWeekday", $settings.showWeekday)
-            toggleRow("showWeekNums", $settings.showWeekNumbers)
-            toggleRow("showLunar", $settings.showLunar)
-            toggleRow("showHolidays", $settings.showHolidays)
+            toggleRow(.showDate, $settings.showDate)
+            toggleRow(.showWeekday, $settings.showWeekday)
+            toggleRow(.showWeekNums, $settings.showWeekNumbers)
+            toggleRow(.showLunar, $settings.showLunar)
+            toggleRow(.showHolidays, $settings.showHolidays)
             if settings.showHolidays {
                 holidayCountryList
             }
-            toggleRow("launchAtLogin", $settings.launchAtLogin)
+            toggleRow(.launchAtLogin, $settings.launchAtLogin)
             languageRow
             appearanceRow
 
@@ -46,7 +46,7 @@ struct SettingsView: View {
 
     private var monthCountRow: some View {
         HStack(spacing: 8) {
-            Text(settings.t("months"))
+            Text(settings.t(.months))
             Slider(
                 value: Binding(
                     get: { Double(settings.monthCount) },
@@ -76,7 +76,7 @@ struct SettingsView: View {
                 }
                 .toggleStyle(.checkbox)
             }
-            Text(settings.t("holidayNote"))
+            Text(settings.t(.holidayNote))
                 .font(.system(size: 10))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -85,34 +85,34 @@ struct SettingsView: View {
     }
 
     private var languageRow: some View {
-        pickerRow("language", selection: $settings.languageCode) {
-            Text(settings.t("system")).tag("system")
+        pickerRow(.language, selection: $settings.languageCode) {
+            Text(settings.t(.system)).tag("system")
             Text("English").tag("en")
             Text("中文").tag("zh-Hans")
         }
     }
 
     private var appearanceRow: some View {
-        pickerRow("appearance", selection: $settings.appearance) {
-            Text(settings.t("system")).tag(AppearanceMode.system)
-            Text(settings.t("light")).tag(AppearanceMode.light)
-            Text(settings.t("dark")).tag(AppearanceMode.dark)
+        pickerRow(.appearance, selection: $settings.appearance) {
+            Text(settings.t(.system)).tag(AppearanceMode.system)
+            Text(settings.t(.light)).tag(AppearanceMode.light)
+            Text(settings.t(.dark)).tag(AppearanceMode.dark)
         }
     }
 
     private var footer: some View {
         HStack {
-            Text("v\(Settings.appVersion) · \(settings.t("author"))")
+            Text("v\(Settings.appVersion) · \(settings.t(.author))")
                 .font(.system(size: 10))
                 .foregroundStyle(.secondary)
             Spacer()
-            Button(settings.t("quit")) { NSApp.terminate(nil) }
+            Button(settings.t(.quit)) { NSApp.terminate(nil) }
         }
     }
 
     // MARK: - Row builders
 
-    private func toggleRow(_ key: String, _ binding: Binding<Bool>) -> some View {
+    private func toggleRow(_ key: StringKey, _ binding: Binding<Bool>) -> some View {
         HStack {
             Text(settings.t(key))
             Spacer()
@@ -124,7 +124,7 @@ struct SettingsView: View {
     }
 
     private func pickerRow<Value: Hashable, Options: View>(
-        _ key: String,
+        _ key: StringKey,
         selection: Binding<Value>,
         @ViewBuilder options: () -> Options
     ) -> some View {

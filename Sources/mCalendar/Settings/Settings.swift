@@ -24,14 +24,14 @@ final class Settings: ObservableObject {
     /// "system", "en", or "zh-Hans".
     @Published var languageCode: String {
         didSet {
-            UserDefaults.standard.set(languageCode, forKey: "languageCode")
+            save(languageCode, .languageCode)
             onChange?()
         }
     }
 
     @Published var appearance: AppearanceMode {
         didSet {
-            UserDefaults.standard.set(appearance.rawValue, forKey: "appearance")
+            save(appearance.rawValue, .appearance)
             onChange?()
         }
     }
@@ -41,7 +41,7 @@ final class Settings: ObservableObject {
     /// Whether the label shows the date (e.g. "Jul 25" / "7月25日").
     @Published var showDate: Bool {
         didSet {
-            UserDefaults.standard.set(showDate, forKey: "showDate")
+            save(showDate, .showDate)
             onChange?()
         }
     }
@@ -49,7 +49,7 @@ final class Settings: ObservableObject {
     /// Whether the label shows the weekday (e.g. "Sat" / "周六").
     @Published var showWeekday: Bool {
         didSet {
-            UserDefaults.standard.set(showWeekday, forKey: "showWeekday")
+            save(showWeekday, .showWeekday)
             onChange?()
         }
     }
@@ -58,32 +58,34 @@ final class Settings: ObservableObject {
 
     /// How many months the popover shows at once (1...6).
     @Published var monthCount: Int {
-        didSet { UserDefaults.standard.set(monthCount, forKey: "monthCount") }
+        didSet { save(monthCount, .monthCount) }
     }
 
     /// Whether the week-number gutter is shown on the left.
     @Published var showWeekNumbers: Bool {
-        didSet { UserDefaults.standard.set(showWeekNumbers, forKey: "showWeekNumbers") }
+        didSet { save(showWeekNumbers, .showWeekNumbers) }
     }
 
     /// Whether each day shows its Chinese lunar date, or the solar term on the
     /// days one falls.
     @Published var showLunar: Bool {
-        didSet { UserDefaults.standard.set(showLunar, forKey: "showLunar") }
+        didSet { save(showLunar, .showLunar) }
     }
 
     /// Whether public holidays are marked. Off by default: it is the only thing
     /// in the app that goes to the network.
     @Published var showHolidays: Bool {
-        didSet { UserDefaults.standard.set(showHolidays, forKey: "showHolidays") }
+        didSet { save(showHolidays, .showHolidays) }
     }
 
     /// Codes of the countries whose holidays are marked, in `HolidayCountry.all` order.
-    @Published var holidayCountries: [String] {
-        didSet { UserDefaults.standard.set(holidayCountries.joined(separator: ","), forKey: "holidayCountries") }
+    @Published var holidayCountries: [CountryCode] {
+        didSet {
+            save(holidayCountries.map(\.rawValue).joined(separator: ","), .holidayCountries)
+        }
     }
 
-    func setHolidayCountry(_ code: String, enabled: Bool) {
+    func setHolidayCountry(_ code: CountryCode, enabled: Bool) {
         var selected = Set(holidayCountries)
         if enabled { selected.insert(code) } else { selected.remove(code) }
         holidayCountries = HolidayCountry.all.map(\.code).filter { selected.contains($0) }
@@ -110,22 +112,36 @@ final class Settings: ObservableObject {
         }
     }
 
+    // MARK: - Storage
+
+    /// The UserDefaults key of each setting. Launch at login is not stored
+    /// here; the system keeps it.
+    private enum Key: String {
+        case languageCode, appearance, showDate, showWeekday, monthCount
+        case showWeekNumbers, showLunar, showHolidays, holidayCountries
+    }
+
+    private func save(_ value: Any, _ key: Key) {
+        UserDefaults.standard.set(value, forKey: key.rawValue)
+    }
+
     // MARK: - Loading
 
     private init() {
         let defaults = UserDefaults.standard
-        languageCode = defaults.string(forKey: "languageCode") ?? "system"
-        appearance = AppearanceMode(rawValue: defaults.string(forKey: "appearance") ?? "") ?? .system
-        let storedMonths = defaults.integer(forKey: "monthCount")
+        languageCode = defaults.string(forKey: Key.languageCode.rawValue) ?? "system"
+        appearance = AppearanceMode(rawValue: defaults.string(forKey: Key.appearance.rawValue) ?? "") ?? .system
+        let storedMonths = defaults.integer(forKey: Key.monthCount.rawValue)
         monthCount = storedMonths == 0 ? 2 : min(max(storedMonths, 1), 6)
-        showDate = defaults.object(forKey: "showDate") as? Bool ?? true
-        showWeekday = defaults.object(forKey: "showWeekday") as? Bool ?? true
-        showWeekNumbers = defaults.object(forKey: "showWeekNumbers") as? Bool ?? true
-        showLunar = defaults.object(forKey: "showLunar") as? Bool ?? false
-        showHolidays = defaults.object(forKey: "showHolidays") as? Bool ?? false
+        showDate = defaults.object(forKey: Key.showDate.rawValue) as? Bool ?? true
+        showWeekday = defaults.object(forKey: Key.showWeekday.rawValue) as? Bool ?? true
+        showWeekNumbers = defaults.object(forKey: Key.showWeekNumbers.rawValue) as? Bool ?? true
+        showLunar = defaults.object(forKey: Key.showLunar.rawValue) as? Bool ?? false
+        showHolidays = defaults.object(forKey: Key.showHolidays.rawValue) as? Bool ?? false
         // Drops the codes of countries no longer offered.
-        let savedCountries = Set((defaults.string(forKey: "holidayCountries") ?? "CN,FI")
-            .split(separator: ",").map(String.init))
+        let savedCountries = defaults.string(forKey: Key.holidayCountries.rawValue)
+            .map { Set($0.split(separator: ",").compactMap { CountryCode(rawValue: String($0)) }) }
+            ?? [.china, .finland]
         holidayCountries = HolidayCountry.all.map(\.code).filter { savedCountries.contains($0) }
         launchAtLogin = SMAppService.mainApp.status == .enabled
     }
@@ -150,7 +166,7 @@ final class Settings: ObservableObject {
     var isChinese: Bool { effectiveLang == "zh" }
 
     /// The interface string for `key` in the current language.
-    func t(_ key: String) -> String {
+    func t(_ key: StringKey) -> String {
         Localization.string(key, language: effectiveLang)
     }
 }

@@ -4,6 +4,9 @@ import AppKit
 /// The popover's content: a title with month navigation, the month grid, a
 /// grip to resize it, and a footer with the version and settings button.
 struct CalendarView: View {
+    /// Called by the gear button.
+    let onOpenSettings: () -> Void
+
     @EnvironmentObject var settings: Settings
     @ObservedObject private var holidays = HolidayStore.shared
     /// A date in the first month shown; the arrows move it by a month.
@@ -72,7 +75,7 @@ struct CalendarView: View {
                 // Same inset as the title, so both line up with the week numbers.
                 .padding(.leading, 5)
             Spacer()
-            Button(action: { (NSApp.delegate as? AppDelegate)?.openSettings() }) {
+            Button(action: onOpenSettings) {
                 Image(systemName: "gearshape")
                     .font(.system(size: 16))
                     .foregroundStyle(Color.primary.opacity(0.7))
@@ -104,7 +107,7 @@ struct CalendarView: View {
     }
 
     /// Countries whose holidays are marked; empty when holidays are off.
-    private var holidayCountries: [String] { settings.showHolidays ? settings.holidayCountries : [] }
+    private var holidayCountries: [CountryCode] { settings.showHolidays ? settings.holidayCountries : [] }
 
     /// The months actually shown: the setting, capped so bigger cells can't push
     /// the popover off the bottom of the screen.

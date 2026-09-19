@@ -6,14 +6,9 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		AA0000000000000000000023 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000014 /* AppIcon.icns */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
 		AA0000000000000000000005 /* mCalendar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mCalendar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000000000000000000013 /* mCalendar-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "mCalendar-Info.plist"; sourceTree = "<group>"; };
-		AA0000000000000000000014 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = AppIcon.icns; path = Resources/AppIcon.icns; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -40,7 +35,6 @@
 			children = (
 				AA0000000000000000000030 /* Sources/mCalendar */,
 				AA0000000000000000000013 /* mCalendar-Info.plist */,
-				AA0000000000000000000014 /* AppIcon.icns */,
 				AA0000000000000000000003 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -115,7 +109,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA0000000000000000000023 /* AppIcon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

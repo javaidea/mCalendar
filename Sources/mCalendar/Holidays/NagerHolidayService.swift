@@ -12,8 +12,8 @@ enum NagerHolidayService {
 
     /// One country's national holidays for `year`, keyed by `dayKey`, or nil
     /// when the download fails.
-    static func fetch(year: Int, countryCode: String) async -> [Int: [HolidayName]]? {
-        guard let url = URL(string: "https://date.nager.at/api/v3/PublicHolidays/\(year)/\(countryCode)"),
+    static func fetch(year: Int, country: CountryCode) async -> [Int: [HolidayName]]? {
+        guard let url = URL(string: "https://date.nager.at/api/v3/PublicHolidays/\(year)/\(country.rawValue)"),
               let data = await holidaySession.fetchData(from: url),
               let items = try? JSONDecoder().decode([Item].self, from: data) else { return nil }
 
@@ -28,10 +28,10 @@ enum NagerHolidayService {
         for item in items where item.global {
             guard let key = dayKey(isoDate: item.date) else { continue }
             var local = item.localName.isEmpty ? item.name : item.localName
-            if countryCode == "KZ" { local = KazakhstanHolidays.corrected(local) }
+            if country == .kazakhstan { local = KazakhstanHolidays.corrected(local) }
             add(key, HolidayName(local: local, english: item.name))
         }
-        if countryCode == "KZ" {
+        if country == .kazakhstan {
             for (key, name) in KazakhstanHolidays.missing(in: year) { add(key, name) }
         }
         return result

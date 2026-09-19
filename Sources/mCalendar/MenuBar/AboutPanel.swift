@@ -10,7 +10,7 @@ enum AboutPanel {
             .applicationVersion: Settings.appVersion,
             .version: "",
             .credits: NSAttributedString(
-                string: settings.t("author"),
+                string: settings.t(.author),
                 attributes: [.font: NSFont.systemFont(ofSize: 11)]
             ),
         ])
