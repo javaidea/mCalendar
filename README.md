@@ -5,10 +5,13 @@ bar to see one continuous grid spanning up to six months — nothing more,
 nothing less.
 
 <p align="center">
-  <img src="docs/screenshot-light.png" width="300" alt="Mini Calendar showing August to October 2026 in the light appearance">
+  <img src="docs/screenshot-light.png" width="360" alt="Mini Calendar showing September to November 2026 with lunar dates and holidays, in the light appearance and English, with the details of 1 October (National Day) open">
   &nbsp;&nbsp;
-  <img src="docs/screenshot-dark.png" width="300" alt="Mini Calendar showing August to October 2026 in the dark appearance">
+  <img src="docs/screenshot-dark.png" width="360" alt="Mini Calendar showing September to November 2026 with lunar dates and holidays, in the dark appearance and Chinese, with the details of 26 September (Mid-Autumn Festival) open">
 </p>
+
+<p align="center"><sub>Lunar dates and holidays switched on; click any day for its details.<br>
+开启农历和节假日后的样子;点击任意一天可查看详情。</sub></p>
 
 ## Why
 
@@ -42,6 +45,16 @@ product.
   the count in Settings)
 - **Week numbers** in the left gutter, with the month abbreviation marking the
   week each month starts (column can be hidden)
+- **Lunar dates** (农历) under each day, with the **24 solar terms** in blue on
+  the days they fall. Optional, and computed on your Mac
+- **Public holidays** as a coloured dot above the day, one colour per country:
+  China, Finland, Estonia, the US and Kazakhstan. China's make-up workdays
+  (调休上班) are marked "班". Optional and off by default; it is the only
+  feature that uses the network (see [Privacy](#privacy))
+- **Click any day** for its details: full date, lunar date, solar term, each
+  country's holiday names, make-up workday and ISO week number
+- Day cells only grow when lunar dates or holidays are on, so the plain grid
+  stays as compact as before
 - **Today** highlighted, `‹ ◯ ›` to page months / jump back to today
 - **Monday-first** weeks, weekends dimmed
 - **Light / dark / system** appearance
@@ -61,13 +74,14 @@ by Apple, so they open normally — no security warning, no right-click dance.
 
 ## Privacy
 
-Mini Calendar collects nothing, sends nothing, and contains no network code —
-it never even links a networking framework. Six preferences are stored locally
-and that is all. See [PRIVACY.md](PRIVACY.md), which also lists the commands to
-verify this yourself.
+Mini Calendar collects nothing and sends nothing about you. The only network
+access is downloading public holiday lists, and only after you turn holidays
+on (they are off by default). Preferences are stored locally. See
+[PRIVACY.md](PRIVACY.md) for exactly which hosts are contacted and how to
+verify it yourself.
 
-(中文:不收集任何信息,不联网,只在本地保存六项设置。详见
-[PRIVACY.md](PRIVACY.md)。)
+(中文:不收集任何信息;只有在你打开"显示节假日"后才会联网下载公开的节假日列表,
+默认关闭。详见 [PRIVACY.md](PRIVACY.md)。)
 
 ## Requirements
 
@@ -98,8 +112,10 @@ main window. To launch it at login, add the built app to
 ## 简介
 
 一个极简的 macOS 菜单栏日历:点击菜单栏上的日期,弹出一张连续显示 1–6 个月的
-日历,拖动日历下方的小横条即可随手增减月份。支持周数列、今天高亮、浅色/深色
-外观、中英文界面,设置在独立窗口中,菜单栏图标右键可退出。
+日历,拖动日历下方的小横条即可随手增减月份。支持周数列、今天高亮、浅色/深色外观、
+中英文界面。可选显示农历和二十四节气(本机计算),以及中国、芬兰、爱沙尼亚、美国、
+哈萨克斯坦的节假日(彩色圆点标注,中国调休上班日标"班";默认关闭,是唯一联网的功能)。
+点击任意一天可查看详情。设置在独立窗口中,菜单栏图标右键可退出。
 
 ## License
 
