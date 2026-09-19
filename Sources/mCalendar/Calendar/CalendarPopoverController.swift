@@ -58,7 +58,15 @@ final class CalendarPopoverController {
     }
 
     func close() {
-        popover?.performClose(nil)
+        if let popover {
+            // A day's details popover, if open, is a child window of this one.
+            // `performClose` would be refused while it is up, leaving this
+            // popover on screen with nothing holding it -- the next click on
+            // the menu bar item then opened a second calendar on top. Close
+            // the child first, then force this one shut with `close`.
+            popover.contentViewController?.view.window?.childWindows?.forEach { $0.close() }
+            popover.close()
+        }
         popover = nil
         if let monitor = outsideClickMonitor {
             NSEvent.removeMonitor(monitor)
