@@ -97,7 +97,11 @@ final class HolidayStore: ObservableObject {
     @Published private var chinaPlans = ChinaSchedule.builtIn
     /// Other countries: code -> day key -> names.
     @Published private var publicHolidays: [String: [Int: [HolidayName]]] = [:]
-    private var fetched: Set<String> = []
+    /// When each country-year was last loaded. The app can stay running for
+    /// weeks, so this expires rather than lasting for the whole run: schedules
+    /// get revised, and next year's is published partway through this one.
+    private var loaded: [String: Date] = [:]
+    private static let refreshInterval: TimeInterval = 24 * 3600
 
     func info(for date: Date, cal: Calendar, countries: [String]) -> HolidayInfo {
         let c = cal.dateComponents([.year, .month, .day], from: date)
@@ -127,17 +131,17 @@ final class HolidayStore: ObservableObject {
             for code in countries {
                 guard !Task.isCancelled else { return }
                 let key = "\(code)-\(year)"
-                guard !fetched.contains(key) else { continue }
+                if let last = loaded[key], Date().timeIntervalSince(last) < Self.refreshInterval { continue }
                 if code == "CN" {
-                    if let plan = await ChinaSchedule.fetch(year: year, currentYear: currentYear) {
-                        chinaPlans[year] = plan
-                    }
+                    let result = await ChinaSchedule.fetch(year: year, currentYear: currentYear)
+                    if let plan = result.plan { chinaPlans[year] = plan }
+                    guard result.current else { continue } // try again next time the popover opens
                 } else if let days = await PublicHolidays.fetch(year: year, countryCode: code) {
                     publicHolidays[code, default: [:]].merge(days) { _, new in new }
                 } else {
                     continue // failed: try again next time the popover opens
                 }
-                fetched.insert(key)
+                loaded[key] = Date()
             }
         }
     }
@@ -271,17 +275,18 @@ enum ChinaSchedule {
     private static let refreshInterval: TimeInterval = 24 * 3600
 
     /// The year's schedule, or nil when unpublished or unreachable (the caller
-    /// then keeps the built-in one, if any).
-    static func fetch(year: Int, currentYear: Int) async -> YearPlan? {
+    /// then keeps the built-in one, if any). `current` is false when the
+    /// download failed and this is an old copy, so the caller retries soon.
+    static func fetch(year: Int, currentYear: Int) async -> (plan: YearPlan?, current: Bool) {
         let cacheURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?
             .appendingPathComponent("me.mynaturefriends.mcalendar/ChinaHolidays/\(year).json")
         let cached = cacheURL.flatMap { try? Data(contentsOf: $0) }.flatMap { decode($0, year: year) }
         let cacheDate = cacheURL.flatMap {
             try? FileManager.default.attributesOfItem(atPath: $0.path)[.modificationDate] as? Date
         }
-        if let cached, !cached.isEmpty, year < currentYear { return cached }
+        if let cached, !cached.isEmpty, year < currentYear { return (cached, true) }
         if cached != nil, let cacheDate, Date().timeIntervalSince(cacheDate) < refreshInterval {
-            return nonEmpty(cached)
+            return (nonEmpty(cached), true)
         }
 
         for source in sources {
@@ -295,9 +300,9 @@ enum ChinaSchedule {
                 )
                 try? data.write(to: cacheURL, options: .atomic)
             }
-            return nonEmpty(plan)
+            return (nonEmpty(plan), true)
         }
-        return nonEmpty(cached)
+        return (nonEmpty(cached), false)
     }
 
     private static func nonEmpty(_ plan: YearPlan?) -> YearPlan? {

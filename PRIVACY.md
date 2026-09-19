@@ -57,8 +57,8 @@ When downloads happen:
 
 - Only when the calendar popover is open, and only for the countries you
   ticked.
-- Nager.Date: once per country and year each time the app runs. The result is
-  kept in memory only and forgotten when the app quits.
+- Nager.Date: at most once a day per country and year. The result is kept in
+  memory only and forgotten when the app quits.
 - China: saved to the cache folder above. A past year is never downloaded
   again. The current and later years are checked at most once a day, because
   the schedule is sometimes revised. The 2025 and 2026 schedules are built into
@@ -192,8 +192,7 @@ Questions: open an issue at
 什么时候下载:
 
 - 只在日历弹窗打开时,只下载你勾选的国家。
-- Nager.Date:应用每次运行时,每个国家每个年份下载一次。结果只保存在内存里,
-  退出应用即清除。
+- Nager.Date:每个国家每个年份最多每天下载一次。结果只保存在内存里,退出应用即清除。
 - 中国:保存在上面提到的缓存目录中。过去的年份不会再次下载;当年及以后的年份
   最多每天检查一次,因为放假安排偶尔会调整。2025、2026 年的安排已内置在应用里,
   没有网络也能显示。
