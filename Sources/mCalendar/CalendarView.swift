@@ -1,8 +1,31 @@
 import SwiftUI
 import AppKit
 
+/// Day-cell size. The plain grid keeps its compact 24pt tiles; lunar dates and
+/// holiday dots each need extra room, so the cells (and the popover) grow only
+/// while those are switched on.
+struct GridMetrics {
+    let cellWidth: CGFloat
+    let cellHeight: CGFloat
+
+    init(lunar: Bool, holidays: Bool) {
+        cellWidth = lunar ? 34 : holidays ? 28 : 24
+        // Holidays add a dot band above the text and an equal one below it.
+        cellHeight = lunar ? (holidays ? 43 : 33) : holidays ? 35 : 24
+    }
+
+    /// Wide enough for the gutter, the padding and seven columns with a little
+    /// air around each tile; 225 for the plain grid.
+    var popoverWidth: CGFloat { (39 + 7 * (cellWidth + 2.6)).rounded() }
+
+    /// Roughly how much taller the popover gets per added month: 4–5 week rows
+    /// plus the 5pt spacing between them.
+    var monthHeight: CGFloat { (cellHeight + 5) * 4.3 }
+}
+
 struct CalendarView: View {
     @EnvironmentObject var settings: Settings
+    @ObservedObject private var holidays = HolidayStore.shared
     @State private var anchor = Date()
     @State private var dragStartCount: Int?
     @State private var dragStartY: CGFloat?
@@ -25,23 +48,52 @@ struct CalendarView: View {
             header
             MonthsGrid(
                 firstMonthStart: startOfMonth(anchor),
-                monthCount: settings.monthCount,
+                monthCount: monthCount,
                 showWeeks: settings.showWeekNumbers,
+                showLunar: settings.showLunar,
+                holidayCountries: holidayCountries,
+                metrics: metrics,
                 cal: cal
             )
             .padding(.top, 12)
+            .task(id: "\(holidayCountries)|\(displayedYears)") {
+                guard !holidayCountries.isEmpty else { return }
+                await holidays.load(years: displayedYears, countries: holidayCountries)
+            }
             dragHandle
             footer
         }
         // The grid's left edge is the week-number gutter, which already reads as
         // inset, so the left margin stays tighter than the other three.
         .padding(EdgeInsets(top: 9, leading: 6, bottom: 9, trailing: 9))
-        .frame(width: 225)
+        .frame(width: metrics.popoverWidth)
     }
 
-    /// Roughly how much taller the popover gets per added month (measured: a month
-    /// adds 4–5 week rows of 24pt plus 5pt spacing).
-    private let monthHeight: CGFloat = 125
+    private var metrics: GridMetrics {
+        GridMetrics(lunar: settings.showLunar, holidays: !holidayCountries.isEmpty)
+    }
+
+    private var holidayCountries: [String] { settings.showHolidays ? settings.holidayCountries : [] }
+
+    /// The months actually shown: the setting, capped so bigger cells can't push
+    /// the popover off the bottom of the screen.
+    private var monthCount: Int { min(settings.monthCount, maxMonths) }
+
+    private var maxMonths: Int {
+        let mouse = NSEvent.mouseLocation
+        let screen = NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) } ?? NSScreen.main
+        guard let height = screen?.visibleFrame.height else { return 6 }
+        // ~110pt of header, weekday row, grip and footer, plus a spare week row.
+        let available = height - 110 - (metrics.cellHeight + 5)
+        return min(6, max(1, Int(available / metrics.monthHeight)))
+    }
+
+    private var displayedYears: [Int] {
+        let first = startOfMonth(anchor)
+        let last = cal.date(byAdding: .month, value: monthCount - 1, to: first) ?? first
+        // Padding days can reach into the neighbouring years.
+        return Array((cal.component(.year, from: first) - 1)...(cal.component(.year, from: last) + 1))
+    }
 
     /// Drag down/up to open or close months, like pulling the bottom edge of the
     /// grid — the grip on the Notification Center calendar widget.
@@ -73,8 +125,8 @@ struct CalendarView: View {
                         // One month per month-height of travel, so the handle stays
                         // under the pointer as the grid grows. Screen y grows upward,
                         // so dragging down opens more months.
-                        let months = Int(((startY - y) / monthHeight).rounded())
-                        let newCount = min(6, max(1, startCount + months))
+                        let months = Int(((startY - y) / metrics.monthHeight).rounded())
+                        let newCount = min(maxMonths, max(1, startCount + months))
                         if newCount != settings.monthCount { settings.monthCount = newCount }
                     }
                     .onEnded { _ in
@@ -106,6 +158,11 @@ struct CalendarView: View {
 
     private var footer: some View {
         HStack {
+            Text("v\(Settings.appVersion)")
+                .font(.system(size: 10))
+                .foregroundStyle(Color.primary.opacity(0.5))
+                // Same inset as the title, so both line up with the week numbers.
+                .padding(.leading, 5)
             Spacer()
             Button(action: { (NSApp.delegate as? AppDelegate)?.openSettings() }) {
                 Image(systemName: "gearshape")
@@ -119,16 +176,16 @@ struct CalendarView: View {
     // "2026年 7–8月" / "Jul – Aug 2026"; single month "2026年 7月" / "Jul 2026".
     private var rangeTitle: String {
         let first = startOfMonth(anchor)
-        let last = cal.date(byAdding: .month, value: settings.monthCount - 1, to: first) ?? first
+        let last = cal.date(byAdding: .month, value: monthCount - 1, to: first) ?? first
         let ya = cal.component(.year, from: first), yb = cal.component(.year, from: last)
         let ma = cal.component(.month, from: first), mb = cal.component(.month, from: last)
         if settings.isChinese {
-            if settings.monthCount == 1 { return "\(ya)年 \(ma)月" }
+            if monthCount == 1 { return "\(ya)年 \(ma)月" }
             return ya == yb ? "\(ya)年 \(ma)–\(mb)月" : "\(ya)年\(ma)月 – \(yb)年\(mb)月"
         }
         let f = DateFormatter(); f.locale = cal.locale; f.dateFormat = "MMM"
         let sa = f.string(from: first), sb = f.string(from: last)
-        if settings.monthCount == 1 { return "\(sa) \(ya)" }
+        if monthCount == 1 { return "\(sa) \(ya)" }
         return ya == yb ? "\(sa) – \(sb) \(ya)" : "\(sa) \(ya) – \(sb) \(yb)"
     }
 
@@ -149,7 +206,13 @@ struct MonthsGrid: View {
     let firstMonthStart: Date
     let monthCount: Int
     let showWeeks: Bool
+    let showLunar: Bool
+    /// Countries whose holidays are marked; empty when holidays are off.
+    let holidayCountries: [String]
+    let metrics: GridMetrics
     let cal: Calendar
+
+    @ObservedObject private var holidays = HolidayStore.shared
 
     private var gutter: CGFloat { showWeeks ? 24 : 0 }
 
@@ -193,6 +256,10 @@ struct MonthsGrid: View {
                                 date: day,
                                 monthIndex: monthIndex(of: day),
                                 banded: isBanded(day),
+                                showLunar: showLunar,
+                                showHolidays: !holidayCountries.isEmpty,
+                                holiday: holidays.info(for: day, cal: cal, countries: holidayCountries),
+                                metrics: metrics,
                                 cal: cal
                             )
                         }
@@ -304,39 +371,89 @@ struct DayCell: View {
     /// True when the day's month sits on the darker band, so a boundary that
     /// falls in the middle of a week row still reads as a break.
     let banded: Bool
+    let showLunar: Bool
+    /// Reserve the dot row, so every row keeps the same height.
+    let showHolidays: Bool
+    let holiday: HolidayInfo
+    let metrics: GridMetrics
     let cal: Calendar
 
+    @EnvironmentObject private var settings: Settings
     @State private var hovered = false
+    @State private var showDetails = false
 
     /// True when the day belongs to the first (topmost) month.
     private var emphasized: Bool { monthIndex == 0 }
+
+    private var countries: [HolidayCountry] {
+        HolidayCountry.all.filter { holiday.names[$0.code] != nil }
+    }
 
     var body: some View {
         let isToday = cal.isDateInToday(date)
         let weekday = cal.component(.weekday, from: date)
         let isWeekend = weekday == 7 || weekday == 1
+        let term = showLunar ? SolarTerm.name(for: date, cal: cal) : nil
+        let plain = !showLunar && !showHolidays
 
-        Text("\(cal.component(.day, from: date))")
-            .font(.system(size: 11.5, weight: isToday ? .bold : .regular))
-            .foregroundStyle(isToday ? Color.white : color(isWeekend: isWeekend))
-            .frame(width: 24, height: 24)
-            .background(
-                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(isToday ? Color.accentColor
-                          : hovered ? Color.primary.opacity(0.12)
-                          : .clear)
-            )
-            .frame(maxWidth: .infinity)
-            .background(
-                Rectangle()
-                    .fill(banded ? Color.primary.opacity(0.10) : .clear)
-                    // Bleed into the 5pt gap between week rows so the band of a
-                    // month is one continuous block rather than stripes.
-                    .padding(.vertical, -2.5)
-            )
-            .contentShape(Rectangle())
-            .onHover { hovered = $0 }
-            .animation(.easeOut(duration: 0.12), value: hovered)
+        VStack(spacing: 1) {
+            Text("\(cal.component(.day, from: date))")
+                .font(.system(size: plain ? 11.5 : 12.5, weight: isToday ? .bold : .regular))
+                .foregroundStyle(isToday ? Color.white : color(isWeekend: isWeekend))
+            if showLunar {
+                Text(term ?? LunarDate.string(from: date))
+                    .font(.system(size: 8.5))
+                    .foregroundStyle(isToday ? Color.white : term != nil ? Color.accentColor : color(isWeekend: isWeekend))
+                    .lineLimit(1)
+                    .fixedSize()
+            }
+        }
+        // The text stays centred; the dots sit in the top margin, and the cell
+        // is tall enough that the same margin is left free below.
+        .frame(width: metrics.cellWidth, height: metrics.cellHeight)
+        .overlay(alignment: .top) {
+            if showHolidays {
+                HStack(spacing: 2) {
+                    ForEach(countries) { country in
+                        Circle()
+                            .fill(isToday ? Color.white : country.color)
+                            .frame(width: 4, height: 4)
+                    }
+                }
+                .padding(.top, 2)
+            }
+        }
+        .overlay(alignment: .topTrailing) {
+            if holiday.isMakeupWorkday {
+                Text("班")
+                    .font(.system(size: 7.5, weight: .bold))
+                    .foregroundStyle(isToday ? Color.white : Color.orange)
+                    .padding(.top, 1)
+                    .padding(.trailing, 1)
+            }
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(isToday ? Color.accentColor
+                      : hovered || showDetails ? Color.primary.opacity(0.12)
+                      : .clear)
+        )
+        .frame(maxWidth: .infinity)
+        .background(
+            Rectangle()
+                .fill(banded ? Color.primary.opacity(0.10) : .clear)
+                // Bleed into the 5pt gap between week rows so the band of a
+                // month is one continuous block rather than stripes.
+                .padding(.vertical, -2.5)
+        )
+        .contentShape(Rectangle())
+        .onHover { hovered = $0 }
+        .animation(.easeOut(duration: 0.12), value: hovered)
+        .onTapGesture { showDetails = true }
+        .popover(isPresented: $showDetails, arrowEdge: .bottom) {
+            DayDetailsView(date: date, showLunar: showLunar, holiday: holiday, cal: cal)
+                .environmentObject(settings)
+        }
     }
 
     // Tiers: first month bright, other months mid-gray, padding days faint.
@@ -353,12 +470,94 @@ struct DayCell: View {
     }
 }
 
+/// What a click on a day opens: everything its tile abbreviates, spelled out.
+struct DayDetailsView: View {
+    let date: Date
+    let showLunar: Bool
+    let holiday: HolidayInfo
+    let cal: Calendar
+
+    @EnvironmentObject private var settings: Settings
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(fullDate)
+                .font(.system(size: 13, weight: .semibold))
+
+            if showLunar {
+                row(settings.t("lunarDate"), LunarDate.string(from: date, includeMonth: true))
+                if let term = SolarTerm.name(for: date, cal: cal) {
+                    row(settings.t("solarTerm"), term, color: .accentColor)
+                }
+            }
+
+            ForEach(HolidayCountry.all.filter { holiday.names[$0.code] != nil }) { country in
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 5) {
+                        Circle().fill(country.color).frame(width: 6, height: 6)
+                        Text(settings.locale.localizedString(forRegionCode: country.code) ?? country.code)
+                    }
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+                    ForEach(holiday.names[country.code] ?? [], id: \.self) { name in
+                        Text(name.local)
+                        if let translation = name.translation(chinese: settings.isChinese) {
+                            Text(translation)
+                                .font(.system(size: 11))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+
+            if holiday.isMakeupWorkday {
+                row(settings.t("chinaSchedule"), settings.t("makeupWorkday"), color: .orange)
+            }
+
+            row(settings.t("week"), "\(cal.component(.weekOfYear, from: date))")
+        }
+        .font(.system(size: 12))
+        .textSelection(.enabled)
+        .fixedSize()
+        .frame(minWidth: 160, alignment: .leading)
+        .padding(14)
+    }
+
+    private var fullDate: String {
+        let f = DateFormatter()
+        f.calendar = cal
+        f.locale = settings.locale
+        f.dateStyle = .full
+        return f.string(from: date)
+    }
+
+    private func row(_ title: String, _ value: String, color: Color = .primary) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .font(.system(size: 10))
+                .foregroundStyle(.secondary)
+            Text(value)
+                .foregroundStyle(color)
+        }
+    }
+}
+
 /// Content of the standalone settings window.
 struct SettingsView: View {
     @EnvironmentObject var settings: Settings
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Image(nsImage: NSApp.applicationIconImage)
+                    .resizable()
+                    .frame(width: 28, height: 28)
+                Text("Mini Calendar")
+                    .font(.system(size: 15, weight: .semibold))
+            }
+
+            Divider()
+
             HStack(spacing: 8) {
                 Text(settings.t("months"))
                 Slider(
@@ -376,6 +575,29 @@ struct SettingsView: View {
             toggleRow("showDate", $settings.showDate)
             toggleRow("showWeekday", $settings.showWeekday)
             toggleRow("showWeekNums", $settings.showWeekNumbers)
+            toggleRow("showLunar", $settings.showLunar)
+            toggleRow("showHolidays", $settings.showHolidays)
+            if settings.showHolidays {
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(HolidayCountry.all) { country in
+                        Toggle(isOn: Binding(
+                            get: { settings.holidayCountries.contains(country.code) },
+                            set: { settings.setHolidayCountry(country.code, enabled: $0) }
+                        )) {
+                            HStack(spacing: 6) {
+                                Circle().fill(country.color).frame(width: 7, height: 7)
+                                Text(settings.locale.localizedString(forRegionCode: country.code) ?? country.code)
+                            }
+                        }
+                        .toggleStyle(.checkbox)
+                    }
+                    Text(settings.t("holidayNote"))
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.leading, 12)
+            }
             toggleRow("launchAtLogin", $settings.launchAtLogin)
 
             HStack {
@@ -405,7 +627,7 @@ struct SettingsView: View {
             Divider()
 
             HStack {
-                Text("Mini Calendar \(Settings.appVersion) · \(settings.t("author"))")
+                Text("v\(Settings.appVersion) · \(settings.t("author"))")
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
                 Spacer()

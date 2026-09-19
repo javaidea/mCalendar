@@ -60,6 +60,29 @@ final class Settings: ObservableObject {
         didSet { UserDefaults.standard.set(showWeekNumbers, forKey: "showWeekNumbers") }
     }
 
+    /// Whether each day shows its Chinese lunar date, or the solar term on the
+    /// days one falls.
+    @Published var showLunar: Bool {
+        didSet { UserDefaults.standard.set(showLunar, forKey: "showLunar") }
+    }
+
+    /// Whether public holidays are marked. Off by default: it is the only thing
+    /// in the app that goes to the network.
+    @Published var showHolidays: Bool {
+        didSet { UserDefaults.standard.set(showHolidays, forKey: "showHolidays") }
+    }
+
+    /// Codes of the countries whose holidays are marked, in `HolidayCountry.all` order.
+    @Published var holidayCountries: [String] {
+        didSet { UserDefaults.standard.set(holidayCountries.joined(separator: ","), forKey: "holidayCountries") }
+    }
+
+    func setHolidayCountry(_ code: String, enabled: Bool) {
+        var selected = Set(holidayCountries)
+        if enabled { selected.insert(code) } else { selected.remove(code) }
+        holidayCountries = HolidayCountry.all.map(\.code).filter { selected.contains($0) }
+    }
+
     /// Launch at login, backed by SMAppService (source of truth is the system).
     @Published var launchAtLogin: Bool {
         didSet {
@@ -92,6 +115,12 @@ final class Settings: ObservableObject {
         showDate = UserDefaults.standard.object(forKey: "showDate") as? Bool ?? true
         showWeekday = UserDefaults.standard.object(forKey: "showWeekday") as? Bool ?? true
         showWeekNumbers = UserDefaults.standard.object(forKey: "showWeekNumbers") as? Bool ?? true
+        showLunar = UserDefaults.standard.object(forKey: "showLunar") as? Bool ?? false
+        showHolidays = UserDefaults.standard.object(forKey: "showHolidays") as? Bool ?? false
+        // Drops codes of countries no longer offered.
+        let savedCountries = Set((UserDefaults.standard.string(forKey: "holidayCountries") ?? "CN,FI")
+            .split(separator: ",").map(String.init))
+        holidayCountries = HolidayCountry.all.map(\.code).filter { savedCountries.contains($0) }
         launchAtLogin = SMAppService.mainApp.status == .enabled
     }
 
@@ -124,7 +153,11 @@ final class Settings: ObservableObject {
             "months": "Months", "settings": "Settings",
             "showDate": "Date in menu bar", "showWeekday": "Weekday in menu bar",
             "showWeekNums": "Week numbers", "about": "About Mini Calendar",
-            "author": "Author: Zhou Yang", "launchAtLogin": "Launch at login"
+            "author": "Author: Zhou Yang", "launchAtLogin": "Launch at login",
+            "showLunar": "Lunar dates & solar terms", "showHolidays": "Public holidays",
+            "holidayNote": "“班” marks a Chinese make-up workday. Holiday data is downloaded from date.nager.at and holiday-cn (GitHub) only while this is on.",
+            "lunarDate": "Lunar date", "makeupWorkday": "Make-up workday",
+            "solarTerm": "Solar term", "chinaSchedule": "China holiday schedule", "week": "Week (ISO)"
         ],
         "zh": [
             "today": "今天", "language": "语言", "appearance": "外观",
@@ -132,7 +165,11 @@ final class Settings: ObservableObject {
             "months": "显示月数", "settings": "设置",
             "showDate": "菜单栏显示日期", "showWeekday": "菜单栏显示星期",
             "showWeekNums": "显示周数列", "about": "关于 Mini Calendar",
-            "author": "作者：Zhou Yang", "launchAtLogin": "开机自动启动"
+            "author": "作者：Zhou Yang", "launchAtLogin": "开机自动启动",
+            "showLunar": "显示农历和节气", "showHolidays": "显示节假日",
+            "holidayNote": "“班”表示中国调休上班日。节假日数据仅在开启时从 date.nager.at 和 holiday-cn (GitHub) 下载。",
+            "lunarDate": "农历", "makeupWorkday": "调休上班",
+            "solarTerm": "节气", "chinaSchedule": "中国放假安排", "week": "周数 (ISO)"
         ]
     ]
 }
