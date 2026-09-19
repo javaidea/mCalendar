@@ -117,7 +117,7 @@ consent prompt for it.
 You do not have to take my word for it:
 
 - The full source is at
-  <https://github.com/mynaturefriends/mCalendar> — it is about 1,450 lines. All
+  <https://github.com/javaidea/mCalendar> — it is about 1,450 lines. All
   network code is in `Sources/mCalendar/Holidays.swift`.
 - `codesign -d --entitlements - /Applications/mCalendar.app` shows the app
   requests no entitlements.
@@ -129,7 +129,7 @@ You do not have to take my word for it:
 
 Releases are signed with an Apple Developer ID certificate and notarized by
 Apple, so macOS can verify the download has not been tampered with. Download only
-from the [Releases page](https://github.com/mynaturefriends/mCalendar/releases).
+from the [Releases page](https://github.com/javaidea/mCalendar/releases).
 
 ## Changes
 
@@ -140,7 +140,7 @@ added, the first feature that uses the network.
 ## Contact
 
 Questions: open an issue at
-<https://github.com/mynaturefriends/mCalendar/issues>.
+<https://github.com/javaidea/mCalendar/issues>.
 
 ---
 
@@ -242,7 +242,7 @@ Mini Calendar 不申请任何系统权限,所以 macOS 从不会为它弹出授�
 
 这些话不必只听我说:
 
-- 完整源码在 <https://github.com/mynaturefriends/mCalendar>,大约 1450 行,
+- 完整源码在 <https://github.com/javaidea/mCalendar>,大约 1450 行,
   所有联网代码都在 `Sources/mCalendar/Holidays.swift`。
 - `codesign -d --entitlements - /Applications/mCalendar.app` 会显示它没有申请
   任何 entitlement。
@@ -254,7 +254,7 @@ Mini Calendar 不申请任何系统权限,所以 macOS 从不会为它弹出授�
 
 发布版本使用 Apple Developer ID 证书签名并已通过 Apple 公证,macOS 因此可以验证
 你下载到的文件未被篡改。请只从
-[Releases 页面](https://github.com/mynaturefriends/mCalendar/releases)下载。
+[Releases 页面](https://github.com/javaidea/mCalendar/releases)下载。
 
 ## 变更
 
@@ -263,4 +263,4 @@ Mini Calendar 不申请任何系统权限,所以 macOS 从不会为它弹出授�
 
 ## 联系方式
 
-有疑问请在 <https://github.com/mynaturefriends/mCalendar/issues> 提 issue。
+有疑问请在 <https://github.com/javaidea/mCalendar/issues> 提 issue。

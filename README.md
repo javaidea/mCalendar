@@ -93,7 +93,7 @@ Features that turn it into something you have to maintain are not coming.
 ## Download
 
 Grab `mCalendar-x.y.zip` from the
-[Releases page](https://github.com/mynaturefriends/mCalendar/releases), unzip,
+[Releases page](https://github.com/javaidea/mCalendar/releases), unzip,
 and drag `mCalendar.app` into `/Applications`.
 
 Builds from v1.0.1 on are signed with a Developer ID certificate and notarized
