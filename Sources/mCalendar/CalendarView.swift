@@ -555,6 +555,7 @@ struct SettingsView: View {
                 Text("Mini Calendar")
                     .font(.system(size: 15, weight: .semibold))
             }
+            .frame(maxWidth: .infinity)
 
             Divider()
 
