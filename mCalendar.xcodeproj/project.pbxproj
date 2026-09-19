@@ -3,28 +3,26 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AA0000000000000000000020 /* mCalendarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000010 /* mCalendarApp.swift */; };
-		AA0000000000000000000021 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000011 /* CalendarView.swift */; };
-		AA0000000000000000000022 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000012 /* Settings.swift */; };
-		AA0000000000000000000024 /* Holidays.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000015 /* Holidays.swift */; };
-		AA0000000000000000000025 /* Lunar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000016 /* Lunar.swift */; };
 		AA0000000000000000000023 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000014 /* AppIcon.icns */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		AA0000000000000000000005 /* mCalendar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mCalendar.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA0000000000000000000010 /* mCalendarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = mCalendarApp.swift; sourceTree = "<group>"; };
-		AA0000000000000000000011 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
-		AA0000000000000000000012 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
-		AA0000000000000000000015 /* Holidays.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Holidays.swift; sourceTree = "<group>"; };
-		AA0000000000000000000016 /* Lunar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lunar.swift; sourceTree = "<group>"; };
 		AA0000000000000000000013 /* mCalendar-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "mCalendar-Info.plist"; sourceTree = "<group>"; };
 		AA0000000000000000000014 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = AppIcon.icns; path = Resources/AppIcon.icns; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		AA0000000000000000000030 /* Sources/mCalendar */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Sources/mCalendar;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AA0000000000000000000007 /* Frameworks */ = {
@@ -55,18 +53,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		AA0000000000000000000030 /* Sources/mCalendar */ = {
-			isa = PBXGroup;
-			children = (
-				AA0000000000000000000010 /* mCalendarApp.swift */,
-				AA0000000000000000000011 /* CalendarView.swift */,
-				AA0000000000000000000012 /* Settings.swift */,
-				AA0000000000000000000015 /* Holidays.swift */,
-				AA0000000000000000000016 /* Lunar.swift */,
-			);
-			path = Sources/mCalendar;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -81,6 +67,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				AA0000000000000000000030 /* Sources/mCalendar */,
 			);
 			name = mCalendar;
 			productName = mCalendar;
@@ -103,7 +92,6 @@
 				};
 			};
 			buildConfigurationList = AA0000000000000000000009 /* Build configuration list for PBXProject "mCalendar" */;
-			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -112,6 +100,7 @@
 				"zh-Hans",
 			);
 			mainGroup = AA0000000000000000000002;
+			preferredProjectObjectVersion = 77;
 			productRefGroup = AA0000000000000000000003 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -137,11 +126,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA0000000000000000000020 /* mCalendarApp.swift in Sources */,
-				AA0000000000000000000021 /* CalendarView.swift in Sources */,
-				AA0000000000000000000022 /* Settings.swift in Sources */,
-				AA0000000000000000000024 /* Holidays.swift in Sources */,
-				AA0000000000000000000025 /* Lunar.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

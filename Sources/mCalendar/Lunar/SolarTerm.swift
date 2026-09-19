@@ -1,31 +1,14 @@
 import Foundation
 
-/// Chinese lunar dates, from Foundation's built-in Chinese calendar.
-enum LunarDate {
-    private static let months = ["正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "冬月", "腊月"]
-    private static let days = [
-        "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
-        "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
-        "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
-    ]
-
-    private static let lunar = Calendar(identifier: .chinese)
-
-    /// The cell label: the day ("初八"), or the month name on the 1st ("八月").
-    /// With `includeMonth`, always both ("闰六月初八").
-    static func string(from date: Date, includeMonth: Bool = false) -> String {
-        // All components, since `.isLeapMonth` alone needs macOS 14.
-        let c = lunar.dateComponents(in: .current, from: date)
-        guard let month = c.month, months.indices.contains(month - 1),
-              let day = c.day, days.indices.contains(day - 1) else { return "" }
-        let monthName = (c.isLeapMonth == true ? "闰" : "") + months[month - 1]
-        return includeMonth ? monthName + days[day - 1] : (day == 1 ? monthName : days[day - 1])
-    }
-}
-
 /// The 24 solar terms: the sun's apparent longitude crossing each multiple of
 /// 15°, dated in China Standard Time.
+///
+/// Each term's date is found numerically rather than looked up, so any year
+/// works. Results are cached per year.
 enum SolarTerm {
+    /// In calendar order, two per month from January: the term's name, the
+    /// solar longitude that defines it, and the day of the month it usually
+    /// falls on, which seeds the search.
     private static let terms: [(name: String, longitude: Double, estimatedDay: Int)] = [
         ("小寒", 285, 6), ("大寒", 300, 20), ("立春", 315, 4), ("雨水", 330, 19),
         ("惊蛰", 345, 6), ("春分", 0, 21), ("清明", 15, 5), ("谷雨", 30, 20),
@@ -35,8 +18,10 @@ enum SolarTerm {
         ("立冬", 225, 7), ("小雪", 240, 22), ("大雪", 255, 7), ("冬至", 270, 22)
     ]
 
+    /// Year -> (month * 100 + day) -> term name.
     private static var cache: [Int: [Int: String]] = [:]
 
+    /// The solar term falling on `date`, or nil on the other ~340 days a year.
     static func name(for date: Date, cal: Calendar) -> String? {
         let c = cal.dateComponents([.year, .month, .day], from: date)
         guard let year = c.year, let month = c.month, let day = c.day else { return nil }
@@ -44,6 +29,8 @@ enum SolarTerm {
         return cache[year]?[month * 100 + day]
     }
 
+    /// Dates all 24 terms of `year` by bisecting for the moment the sun
+    /// reaches each longitude, then reading that moment's date in China.
     private static func compute(_ year: Int) -> [Int: String] {
         var utc = Calendar(identifier: .gregorian)
         utc.timeZone = TimeZone(secondsFromGMT: 0)!
