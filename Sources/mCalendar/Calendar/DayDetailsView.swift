@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// What a click on a day opens: everything its tile abbreviates, spelled out.
-/// Full date, lunar date and solar term, each country's holidays in their own
-/// language with a translation, make-up workday, and ISO week.
+/// Full date, each country's holidays in their own language with a
+/// translation, make-up workday, then lunar date and solar term.
 struct DayDetailsView: View {
     let date: Date
     let showLunar: Bool
@@ -16,13 +16,6 @@ struct DayDetailsView: View {
             Text(fullDate)
                 .font(.system(size: 13, weight: .semibold))
 
-            if showLunar {
-                row(settings.t(.lunarDate), LunarDate.string(from: date, includeMonth: true))
-                if let term = SolarTerm.name(for: date, cal: cal) {
-                    row(settings.t(.solarTerm), term, color: .accentColor)
-                }
-            }
-
             ForEach(HolidayCountry.all.filter { holiday.names[$0.code] != nil }) { country in
                 holidaySection(country)
             }
@@ -31,7 +24,12 @@ struct DayDetailsView: View {
                 row(settings.t(.chinaSchedule), settings.t(.makeupWorkday), color: .orange)
             }
 
-            row(settings.t(.week), "\(cal.component(.weekOfYear, from: date))")
+            if showLunar {
+                row(settings.t(.lunarDate), LunarDate.string(from: date, includeMonth: true))
+                if let term = SolarTerm.name(for: date, cal: cal) {
+                    row(settings.t(.solarTerm), term, color: .accentColor)
+                }
+            }
         }
         .font(.system(size: 12))
         .textSelection(.enabled)
@@ -49,7 +47,8 @@ struct DayDetailsView: View {
         return f.string(from: date)
     }
 
-    /// The country with its dot, then each holiday's local name and translation.
+    /// The country with its dot, then each holiday's local name with its
+    /// translation in brackets after it.
     private func holidaySection(_ country: HolidayCountry) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 5) {
@@ -59,11 +58,10 @@ struct DayDetailsView: View {
             .font(.system(size: 10))
             .foregroundStyle(.secondary)
             ForEach(holiday.names[country.code] ?? [], id: \.self) { name in
-                Text(name.local)
                 if let translation = name.translation(chinese: settings.isChinese) {
-                    Text(translation)
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
+                    Text(name.local) + Text(" (\(translation))").foregroundColor(.secondary)
+                } else {
+                    Text(name.local)
                 }
             }
         }

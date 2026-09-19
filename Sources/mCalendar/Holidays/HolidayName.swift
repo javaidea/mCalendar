@@ -13,8 +13,14 @@ struct HolidayName: Hashable {
     /// when it would only repeat it (US holidays in English, Chinese in Chinese).
     /// A holiday missing from the Chinese table falls back to English.
     func translation(chinese: Bool) -> String? {
-        let t = chinese ? HolidayName.chinese[english] ?? english : english
+        let t = chinese ? chineseName ?? english : english
         return t == local ? nil : t
+    }
+
+    /// The Chinese name, if known: China's own holidays already have it as
+    /// their local name; other countries' come from the table.
+    private var chineseName: String? {
+        HolidayName.chinaInEnglish[local] != nil ? local : HolidayName.chinese[english]
     }
 
     /// A name from China's schedule, which arrives in Chinese only.

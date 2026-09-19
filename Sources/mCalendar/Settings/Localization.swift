@@ -45,5 +45,5 @@ enum StringKey: String, CaseIterable {
     // Menus and About
     case about, quit, author
     // Day details
-    case lunarDate, solarTerm, chinaSchedule, makeupWorkday, week
+    case lunarDate, solarTerm, chinaSchedule, makeupWorkday
 }

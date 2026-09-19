@@ -4,6 +4,9 @@
     "" : {
 
     },
+    " (%@)" : {
+
+    },
     "%lld" : {
 
     },
@@ -379,23 +382,6 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "v%1$@ · %2$@"
-          }
-        }
-      }
-    },
-    "week" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Week (ISO)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "周数 (ISO)"
           }
         }
       }
