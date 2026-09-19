@@ -14,7 +14,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
         // Use the icon in the bundle rather than the system's cached copy, which
         // can lag behind a new icon when the version number stays the same.
-        if let icon = Bundle.main.image(forResource: "AppIcon") {
+        // Read the .icns file directly: `Bundle.image(forResource:)` looks in an
+        // asset catalog first, and with none in the app CoreUI logs an error.
+        if let url = Bundle.main.url(forResource: "AppIcon", withExtension: "icns"),
+           let icon = NSImage(contentsOf: url) {
             NSApp.applicationIconImage = icon
         }
         applyAppearance()
