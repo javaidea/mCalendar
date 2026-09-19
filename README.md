@@ -1,8 +1,8 @@
 # Mini Calendar (mCalendar)
 
 A minimal, keyboard-free macOS menu bar calendar. Click the date in your menu
-bar to see one continuous grid spanning up to six months — nothing more,
-nothing less.
+bar to see one continuous grid spanning up to six months, with lunar dates and
+public holidays if you want them.
 
 <p align="center">
   <img src="docs/screenshot-light.png" width="360" alt="Mini Calendar showing September to November 2026 with lunar dates and holidays, in the light appearance and English, with the details of 1 October (National Day) open">
@@ -20,11 +20,16 @@ something and just need to *see* a calendar — what weekday a date falls on,
 how the next few weeks line up. Opening the full Calendar app for that always
 felt like too much.
 
-So this app does exactly one thing: click the menu bar, and a calendar is in
-front of you. No events, no reminders, no accounts — and there never will be.
-This is intentional: I'm not going to keep integrating features. A calendar
+So this app does one thing: click the menu bar, and a calendar is in front of
+you. No events, no reminders, no accounts — and there never will be. A calendar
 you can glance at, instantly, that stays out of the way — that's the whole
 product.
+
+That is also the test for anything added. Lunar dates and public holidays
+passed it: they answer the same glance — is that day a holiday? what is the
+lunar date? — without asking you to enter or manage anything. Both are off
+until you switch them on, so the plain calendar stays exactly as it was.
+Features that turn it into something you have to maintain are not coming.
 
 ## 为什么做这个
 
@@ -32,8 +37,11 @@ product.
 接下来几周怎么排。为了看个日期去打开完整的日历应用,总觉得太重了。
 
 所以它只做一件事:点一下菜单栏,日历就在眼前。没有日程、没有提醒、不用登录
-账号——将来也不会有。这是有意为之:我不打算继续往里集成功能。一个点开就能
-看到日历、看完就退开的小工具,这就是它的全部。
+账号——将来也不会有。一个点开就能看到日历、看完就退开的小工具,这就是它的全部。
+
+新功能也按这个标准取舍。农历和节假日符合它:它们回答的仍是"看一眼"的问题——
+那天放不放假?农历是几号?——不需要你录入或维护任何东西。两者默认关闭,不打开的话,
+日历和原来一模一样。会让它变成需要打理的东西的功能,不会加。
 
 ## Features
 
@@ -61,6 +69,26 @@ product.
 - **English / 中文** interface (or follow the system language)
 - Right-click the menu bar icon for About / Quit
 - Settings live in a standalone window (gear button in the popover)
+
+## 功能
+
+- **菜单栏标签**显示当天日期和星期(可分别关闭;都关闭时显示日历图标)
+- **连续多月视图**:1–6 个月排成一张无需滚动的网格,当月醒目,后面的月份淡一些
+- **拖动日历下方的小横条**即可随手增减月份(也可在设置中调整)
+- **周数列**显示在左侧,每月开始的那一周改为显示月份缩写(可隐藏)
+- **农历**显示在每天下方,**二十四节气**当天以蓝字显示节气名。可选,全部在本机计算
+- **节假日**以彩色圆点标在日期上方,每个国家一种颜色:中国、芬兰、爱沙尼亚、美国、
+  哈萨克斯坦。中国的调休上班日标"班"。可选且默认关闭;这是唯一联网的功能
+  (见[隐私](#privacy))
+- **点击任意一天**查看详情:完整日期、农历、节气、各国节日名称(原名加翻译)、
+  调休上班以及 ISO 周数
+- 只有打开农历或节假日时日期格才会变大,不打开时日历和原来一样紧凑
+- **今天**高亮显示,`‹ ◯ ›` 翻月 / 回到今天
+- **周一**为一周的第一天,周末颜色较淡
+- **浅色 / 深色 / 跟随系统**外观
+- **English / 中文**界面(或跟随系统语言)
+- 右键点击菜单栏图标可打开"关于"或退出
+- 设置在独立窗口中(点弹窗里的齿轮按钮)
 
 ## Download
 
@@ -108,14 +136,6 @@ swift run
 The app is a menu-bar-only agent (`LSUIElement`): it shows no Dock icon and no
 main window. To launch it at login, add the built app to
 **System Settings → General → Login Items**.
-
-## 简介
-
-一个极简的 macOS 菜单栏日历:点击菜单栏上的日期,弹出一张连续显示 1–6 个月的
-日历,拖动日历下方的小横条即可随手增减月份。支持周数列、今天高亮、浅色/深色外观、
-中英文界面。可选显示农历和二十四节气(本机计算),以及中国、芬兰、爱沙尼亚、美国、
-哈萨克斯坦的节假日(彩色圆点标注,中国调休上班日标"班";默认关闭,是唯一联网的功能)。
-点击任意一天可查看详情。设置在独立窗口中,菜单栏图标右键可退出。
 
 ## License
 
