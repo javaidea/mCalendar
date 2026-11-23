@@ -50,9 +50,18 @@ final class CalendarPopoverController {
         popover.contentViewController?.view.window?.makeKeyAndOrderFront(nil)
         self.popover = popover
 
+        // The system can report a click on the menu bar item itself here, on
+        // mouse-down, before the item's own action runs on mouse-up. Closing
+        // then would make that action find no popover and open a fresh one, so
+        // every click reopened the calendar instead of toggling it. Leave
+        // clicks on the item to `toggle`.
         outsideClickMonitor = NSEvent.addGlobalMonitorForEvents(
             matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]
-        ) { [weak self] _ in
+        ) { [weak self, weak button] _ in
+            if let button, let window = button.window,
+               window.convertToScreen(button.convert(button.bounds, to: nil)).contains(NSEvent.mouseLocation) {
+                return
+            }
             self?.close()
         }
     }
