@@ -78,17 +78,26 @@ final class Settings: ObservableObject {
         didSet { save(showHolidays, .showHolidays) }
     }
 
-    /// Codes of the countries whose holidays are marked, in `HolidayCountry.all` order.
-    @Published var holidayCountries: [CountryCode] {
+    /// Codes of the countries whose holidays are marked, in the order they
+    /// were added; at most `HolidayCountry.maxSelected`.
+    @Published private(set) var holidayCountries: [CountryCode] {
         didSet {
             save(holidayCountries.map(\.rawValue).joined(separator: ","), .holidayCountries)
         }
     }
 
-    func setHolidayCountry(_ code: CountryCode, enabled: Bool) {
-        var selected = Set(holidayCountries)
-        if enabled { selected.insert(code) } else { selected.remove(code) }
-        holidayCountries = HolidayCountry.all.map(\.code).filter { selected.contains($0) }
+    /// Whether another country can be added without removing one first.
+    var canAddHolidayCountry: Bool { holidayCountries.count < HolidayCountry.maxSelected }
+
+    /// Adds `code` at the end, or does nothing if it is already there or the
+    /// selection is full.
+    func addHolidayCountry(_ code: CountryCode) {
+        guard canAddHolidayCountry, !holidayCountries.contains(code) else { return }
+        holidayCountries.append(code)
+    }
+
+    func removeHolidayCountry(_ code: CountryCode) {
+        holidayCountries.removeAll { $0 == code }
     }
 
     // MARK: - System
@@ -138,11 +147,17 @@ final class Settings: ObservableObject {
         showWeekNumbers = defaults.object(forKey: Key.showWeekNumbers.rawValue) as? Bool ?? true
         showLunar = defaults.object(forKey: Key.showLunar.rawValue) as? Bool ?? false
         showHolidays = defaults.object(forKey: Key.showHolidays.rawValue) as? Bool ?? false
-        // Drops the codes of countries no longer offered.
-        let savedCountries = defaults.string(forKey: Key.holidayCountries.rawValue)
-            .map { Set($0.split(separator: ",").compactMap { CountryCode(rawValue: String($0)) }) }
-            ?? [.china, .finland]
-        holidayCountries = HolidayCountry.all.map(\.code).filter { savedCountries.contains($0) }
+        // Drops malformed codes and duplicates, and anything past the limit.
+        var savedCountries: [CountryCode] = []
+        if let saved = defaults.string(forKey: Key.holidayCountries.rawValue) {
+            for code in saved.split(separator: ",").compactMap({ CountryCode(validating: String($0)) })
+            where !savedCountries.contains(code) {
+                savedCountries.append(code)
+            }
+        } else {
+            savedCountries = [.china, CountryCode(rawValue: "FI")]
+        }
+        holidayCountries = Array(savedCountries.prefix(HolidayCountry.maxSelected))
         launchAtLogin = SMAppService.mainApp.status == .enabled
     }
 

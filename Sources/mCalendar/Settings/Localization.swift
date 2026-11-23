@@ -42,6 +42,8 @@ enum StringKey: String, CaseIterable {
     // Settings window
     case settings, months, showDate, showWeekday, showWeekNums, showLunar, showHolidays
     case holidayNote, launchAtLogin, language, appearance, system, light, dark
+    // Holiday country picker
+    case addCountry, searchCountries, countryLimitReached, countryListFailed, retry, noMatches
     // Menus and About
     case about, quit, author
     // Day details

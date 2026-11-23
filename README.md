@@ -56,7 +56,8 @@ Features that turn it into something you have to maintain are not coming.
 - **Lunar dates** (农历) under each day, with the **24 solar terms** in blue on
   the days they fall. Optional, and computed on your Mac
 - **Public holidays** as a coloured dot above the day, one colour per country:
-  China, Finland, Estonia, the US and Kazakhstan. China's make-up workdays
+  pick up to five from a searchable list of 200+ countries (the + under
+  holidays in Settings). China's make-up workdays
   (调休上班) are marked "班". Optional and off by default; it is the only
   feature that uses the network (see [Privacy](#privacy))
 - **Click any day** for its details: full date, lunar date, solar term, each
@@ -77,8 +78,8 @@ Features that turn it into something you have to maintain are not coming.
 - **拖动日历下方的小横条**即可随手增减月份(也可在设置中调整)
 - **周数列**显示在左侧,每月开始的那一周改为显示月份缩写(可隐藏)
 - **农历**显示在每天下方,**二十四节气**当天以蓝字显示节气名。可选,全部在本机计算
-- **节假日**以彩色圆点标在日期上方,每个国家一种颜色:中国、芬兰、爱沙尼亚、美国、
-  哈萨克斯坦。中国的调休上班日标"班"。可选且默认关闭;这是唯一联网的功能
+- **节假日**以彩色圆点标在日期上方,每个国家一种颜色:在设置里点节假日下方的 +,
+  从 200 多个国家中搜索选择,最多 5 个。中国的调休上班日标"班"。可选且默认关闭;这是唯一联网的功能
   (见[隐私](#privacy))
 - **点击任意一天**查看详情:完整日期、农历、节气、各国节日名称(原名加翻译)、
   调休上班以及 ISO 周数

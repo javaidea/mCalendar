@@ -16,7 +16,7 @@ struct DayDetailsView: View {
             Text(fullDate)
                 .font(.system(size: 13, weight: .semibold))
 
-            ForEach(HolidayCountry.all.filter { holiday.names[$0.code] != nil }) { country in
+            ForEach(HolidayCountry.selected(settings.holidayCountries).filter { holiday.names[$0.code] != nil }) { country in
                 holidaySection(country)
             }
 

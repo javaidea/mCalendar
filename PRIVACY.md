@@ -9,7 +9,7 @@ There is no analytics, no crash reporting, no telemetry, no account, no
 a calendar from your Mac's system clock; lunar dates and solar terms are
 computed on your Mac.
 
-Last updated: 19 September 2026. Applies to Mini Calendar 1.1.0 and later.
+Last updated: 23 November 2026. Applies to Mini Calendar 1.2.0 and later.
 
 ## What the app stores
 
@@ -45,18 +45,21 @@ requests with no request body.
 
 | Used for | Exact URL | Service |
 | --- | --- | --- |
-| Holidays in Finland, Estonia, the US and Kazakhstan | `https://date.nager.at/api/v3/PublicHolidays/{year}/{country}` | [Nager.Date](https://date.nager.at), a free public holiday API |
+| Holidays in every country you add except China | `https://date.nager.at/api/v3/PublicHolidays/{year}/{country}` | [Nager.Date](https://date.nager.at), a free public holiday API |
+| The list of countries to choose from, only when you open the country picker | `https://date.nager.at/api/v3/AvailableCountries` | Nager.Date |
 | China's holidays and make-up workdays | `https://raw.githubusercontent.com/NateScarlet/holiday-cn/master/{year}.json` | [holiday-cn](https://github.com/NateScarlet/holiday-cn) on GitHub, an open-source copy of the State Council notices |
 | The same file, only if GitHub cannot be reached | `https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/{year}.json` | jsDelivr CDN mirror of the above |
 
-`{country}` is the two-letter code of a country you ticked (`FI`, `EE`, `US`
-or `KZ`). `{year}` is a year on screen, or the year either side of it
+`{country}` is the two-letter code of a country you added (for example `FI`;
+at most five). `{year}` is a year on screen, or the year either side of it
 (for example `2026`).
 
 When downloads happen:
 
-- Only when the calendar popover is open, and only for the countries you
-  ticked.
+- Holiday lists: only when the calendar popover is open, and only for the
+  countries you added.
+- Country list: only when you click **+** under holidays in Settings, at most
+  once per run of the app.
 - Nager.Date: at most once a day per country and year. The result is kept in
   memory only and forgotten when the app quits.
 - China: saved to the cache folder above. A past year is never downloaded
@@ -84,7 +87,7 @@ User-Agent: MiniCalendar
 - No identifier, account, device name, serial number, location, time zone or
   any of your settings are sent. The only information in the request is what
   you can see in the URL: a year, and for Nager.Date the code of a country you
-  ticked.
+  added.
 
 ### What is never sent
 
@@ -153,7 +156,7 @@ Questions: open an issue at
 没有统计分析,没有崩溃上报,没有遥测,不需要账号,没有所谓"匿名使用数据",也没有
 任何第三方 SDK。它读取你 Mac 的系统时间画出一张日历;农历和节气都在本机计算。
 
-最后更新:2026年9月19日。适用于 Mini Calendar 1.1.0 及之后的版本。
+最后更新:2026年11月23日。适用于 Mini Calendar 1.2.0 及之后的版本。
 
 ## 应用保存了什么
 
@@ -166,7 +169,7 @@ Questions: open an issue at
 分别是:显示月份数、菜单栏是否显示日期、菜单栏是否显示星期、是否显示周数列、
 是否显示农历、是否显示节假日、显示哪些国家的节假日、界面语言、外观。全部内容就这些。
 
-打开节假日并勾选中国时,下载的中国放假安排会缓存在
+打开节假日并添加中国时,下载的中国放假安排会缓存在
 `~/Library/Caches/me.mynaturefriends.mcalendar/ChinaHolidays/`。
 
 如果你打开**开机自动启动**,应用会通过 `SMAppService` 向 macOS 注册为登录项。
@@ -183,16 +186,18 @@ Questions: open an issue at
 
 | 用途 | 完整 URL | 服务 |
 | --- | --- | --- |
-| 芬兰、爱沙尼亚、美国、哈萨克斯坦的节假日 | `https://date.nager.at/api/v3/PublicHolidays/{年份}/{国家}` | [Nager.Date](https://date.nager.at),免费的公共假日 API |
+| 除中国外你添加的各国节假日 | `https://date.nager.at/api/v3/PublicHolidays/{年份}/{国家}` | [Nager.Date](https://date.nager.at),免费的公共假日 API |
+| 可选国家列表,仅在打开国家选择器时 | `https://date.nager.at/api/v3/AvailableCountries` | Nager.Date |
 | 中国的放假和调休安排 | `https://raw.githubusercontent.com/NateScarlet/holiday-cn/master/{年份}.json` | GitHub 上的开源项目 [holiday-cn](https://github.com/NateScarlet/holiday-cn),整理自国务院公告 |
 | 同一个文件,仅在连不上 GitHub 时使用 | `https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/{年份}.json` | 上一项在 jsDelivr CDN 上的镜像 |
 
-`{国家}` 是你勾选的国家的两位代码(`FI`、`EE`、`US` 或 `KZ`)。`{年份}` 是
+`{国家}` 是你添加的国家的两位代码(例如 `FI`;最多五个)。`{年份}` 是
 日历上显示的年份,或它前后各一年(例如 `2026`)。
 
 什么时候下载:
 
-- 只在日历弹窗打开时,只下载你勾选的国家。
+- 节假日列表:只在日历弹窗打开时,只下载你添加的国家。
+- 国家列表:只在你点击设置中节假日下方的 **+** 时下载,每次运行应用最多一次。
 - Nager.Date:每个国家每个年份最多每天下载一次。结果只保存在内存里,退出应用即清除。
 - 中国:保存在上面提到的缓存目录中。过去的年份不会再次下载;当年及以后的年份
   最多每天检查一次,因为放假安排偶尔会调整。2025、2026 年的安排已内置在应用里,
@@ -215,7 +220,7 @@ User-Agent: MiniCalendar
   你的 macOS 版本、系统语言或应用版本。
 - 不发送也不保存任何 Cookie,应用不保留网页缓存。
 - 不发送任何标识符、账号、设备名、序列号、位置、时区或你的任何设置。请求里的全部
-  信息就是 URL 里能看到的:一个年份,以及(Nager.Date 请求中)你勾选的一个国家代码。
+  信息就是 URL 里能看到的:一个年份,以及(Nager.Date 请求中)你添加的一个国家代码。
 
 ### 绝不会发送什么
 

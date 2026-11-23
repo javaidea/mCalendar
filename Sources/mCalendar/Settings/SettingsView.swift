@@ -4,6 +4,7 @@ import SwiftUI
 /// setting, and the version and Quit button at the bottom.
 struct SettingsView: View {
     @EnvironmentObject var settings: Settings
+    @State private var showCountryPicker = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -60,21 +61,39 @@ struct SettingsView: View {
         }
     }
 
-    /// One checkbox per country, indented under the holidays switch, with a
-    /// note on "班" and where the data comes from.
+    /// The selected countries, each with a remove button, then a "+" that
+    /// opens the searchable picker, indented under the holidays switch, with
+    /// a note on "班" and where the data comes from.
     private var holidayCountryList: some View {
         VStack(alignment: .leading, spacing: 6) {
-            ForEach(HolidayCountry.all) { country in
-                Toggle(isOn: Binding(
-                    get: { settings.holidayCountries.contains(country.code) },
-                    set: { settings.setHolidayCountry(country.code, enabled: $0) }
-                )) {
-                    HStack(spacing: 6) {
-                        Circle().fill(country.color).frame(width: 7, height: 7)
-                        Text(country.name(in: settings.locale))
+            ForEach(HolidayCountry.selected(settings.holidayCountries)) { country in
+                HStack(spacing: 6) {
+                    Circle().fill(country.color).frame(width: 7, height: 7)
+                    Text(country.name(in: settings.locale))
+                    Spacer()
+                    Button {
+                        settings.removeHolidayCountry(country.code)
+                    } label: {
+                        Image(systemName: "minus.circle.fill")
+                            .foregroundStyle(.secondary)
                     }
+                    .buttonStyle(.borderless)
                 }
-                .toggleStyle(.checkbox)
+            }
+            HStack(spacing: 6) {
+                Button {
+                    showCountryPicker = true
+                } label: {
+                    Label(settings.t(.addCountry), systemImage: "plus.circle.fill")
+                }
+                .buttonStyle(.borderless)
+                .popover(isPresented: $showCountryPicker, arrowEdge: .trailing) {
+                    CountryPickerView().environmentObject(settings)
+                }
+                Spacer()
+                Text("\(settings.holidayCountries.count)/\(HolidayCountry.maxSelected)")
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
             }
             Text(settings.t(.holidayNote))
                 .font(.system(size: 10))

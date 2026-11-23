@@ -84,10 +84,10 @@ struct DayCell: View {
         }
     }
 
-    /// One dot per country with a holiday that day, in `HolidayCountry.all` order.
+    /// One dot per country with a holiday that day, in the order they were selected.
     private func holidayDots(isToday: Bool) -> some View {
         HStack(spacing: 2) {
-            ForEach(HolidayCountry.all.filter { holiday.names[$0.code] != nil }) { country in
+            ForEach(HolidayCountry.selected(settings.holidayCountries).filter { holiday.names[$0.code] != nil }) { country in
                 Circle()
                     .fill(isToday ? Color.white : country.color)
                     .frame(width: 4, height: 4)
